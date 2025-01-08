@@ -1,0 +1,56 @@
+services:
+  api:
+    image: microservice-user
+    container_name: user-microservice
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db-user
+    networks:
+      - app-network
+ 
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-user:5432/ms-user
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+
+  db-user: 
+    image: postgres:14.5
+    container_name: ms-user-database
+    environment:
+      POSTGRES_USER:  ${POSTGRES_USER}
+      POSTGRES_PASSWORD:  ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ms-user
+    networks:
+      - app-network
+
+  api-2:
+    image: microservice-email
+    container_name: email-microservice
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db-email
+    networks:
+      - app-network
+ 
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-email:5432/ms-email
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD:  ${SPRING_DATASOURCE_PASSWORD}
+
+  db-email: 
+    image: postgres:14.5
+    container_name: ms-email-database
+    environment:
+      POSTGRES_USER:  ${POSTGRES_USER}
+      POSTGRES_PASSWORD:  ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ms-email
+    networks:
+      - app-network
+  
+
+networks:
+  app-network:
+    driver: bridge
+  
