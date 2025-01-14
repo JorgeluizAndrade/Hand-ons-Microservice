@@ -18,11 +18,13 @@ public class EmailService {
 
 	private final EmailRepository emailRepository;
 	private final JavaMailSender emailSender;
-
-	public EmailService(EmailRepository emailRepository, JavaMailSender emailSender) {
+	private final LogSenderService logSenderService;
+	
+	public EmailService(EmailRepository emailRepository, JavaMailSender emailSender, LogSenderService logSenderService) {
 		// TODO Auto-generated constructor stub
 		this.emailRepository = emailRepository;
 		this.emailSender = emailSender;
+		this.logSenderService = logSenderService;
 	}
 
 	@Value(value = "${spring.mail.username}")
@@ -43,11 +45,24 @@ public class EmailService {
 			message.setText(email.getText());
 
 			emailSender.send(message);
+			
+			logSenderService.sendLog(
+	                "E-MAIL_ENVIADO",
+	                "Microsserviço de E-mail",
+	                "E-mail enviado para: " + emailFrom
+	            );
+
 		
 			
 			email.setStatusEmail(StatusEmail.SENT);
 		} catch (MailException e) {
 			email.setStatusEmail(StatusEmail.SENT);
+			logSenderService.sendLog(
+	                "E-MAIL_FALHOU",
+	                "Microsserviço de E-mail",
+	                "E-mail enviado para: " + emailFrom
+	            );
+
 		} finally {
 			return emailRepository.save(email);
 		}
